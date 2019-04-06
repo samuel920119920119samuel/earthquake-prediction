@@ -102,3 +102,9 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# kaggle folder
+submission/
+logs/
+model/
+raw_data/
