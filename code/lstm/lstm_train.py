@@ -1,5 +1,6 @@
 import shutil
 import os
+import argparse
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
@@ -20,9 +21,20 @@ shutil.rmtree('model')
 os.mkdir('logs')
 os.mkdir('model')
 
-float_data = pd.read_csv("raw_data/train.csv", \
-                         dtype={"acoustic_data": np.float32, "time_to_failure": np.float32}, \
-                         nrows=204677355).to_numpy()
+# argument
+parser = argparse.ArgumentParser()
+parser.add_argument("-p", "--partial", help="Use only a part of dataset", action="store_true")
+args = parser.parse_args()
+if args.partial:
+    print("Reading 30% of dataset...")
+    float_data = pd.read_csv("raw_data/train.csv", \
+                             dtype={"acoustic_data": np.float32, "time_to_failure": np.float32}, \
+                             nrows=204677355).to_numpy()
+else:
+    print("Reading full dataset...")
+    float_data = pd.read_csv("raw_data/train.csv", \
+                             dtype={"acoustic_data": np.float32, "time_to_failure": np.float32}).to_numpy()
+
 print('read raw data complete')
 train_gen = gen(float_data) # samples, targets
 valid_gen = gen(float_data, max_index=104677355) # second

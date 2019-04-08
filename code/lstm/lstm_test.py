@@ -1,4 +1,5 @@
 import os
+import argparse
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
@@ -6,7 +7,11 @@ from tensorflow.keras.models import load_model
 
 from generator import create_X
 
-model_path = 'model/lstm-01-2.12.hdf5'
+parser = argparse.ArgumentParser()
+parser.add_argument("model", help="Choose a model checkpoint for prediction",
+                    type=str)
+args = parser.parse_args()
+model_path = 'model/' + args.model
 
 submission = pd.read_csv('raw_data/sample_submission.csv',
                           index_col='seg_id',
