@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import time
 import gc
+import os
 
 start=time.time()
 gc.disable()#speed up by disable gc temporarily
@@ -68,5 +69,9 @@ for segment in range(segments):
 print(time.time()-start)
 #from IPython import embed
 #embed()
-X_tr.to_pickle('x_tr.pkl')
-Y_tr.to_pickle('y_tr.pkl')
+ft_dir = 'features/'
+if not os.path.exists(ft_dir):
+    os.mkdir(ft_dir)
+
+X_tr.to_pickle(ft_dir + 'x_tr.pkl')
+Y_tr.to_pickle(ft_dir + 'y_tr.pkl')

@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import time
+import os
 
 start=time.time()
 
@@ -49,4 +50,8 @@ for seg_id in X_test.index:
 print(time.time()-start)
 #from IPython import embed
 #embed()
-X_test.to_pickle('x_test.pkl')
+ft_dir = 'features/'
+if not os.path.exists(ft_dir):
+    os.mkdir(ft_dir)
+
+X_test.to_pickle(ft_dir + 'x_test.pkl')
