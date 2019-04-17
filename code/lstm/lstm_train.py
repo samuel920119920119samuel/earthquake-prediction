@@ -13,7 +13,7 @@ from generator import gen
 
 # use all time series data 104677355
 
-n_features = 20
+n_features = 12
 
 # delete old checkpoints and logs
 shutil.rmtree('logs')
@@ -37,15 +37,15 @@ else:
 
 print('read raw data complete')
 train_gen = gen(float_data) # samples, targets
-valid_gen = gen(float_data, max_index=104677355) # second
+valid_gen = gen(float_data, max_index=50085877) # second
 
 callbacks = [
-    ModelCheckpoint("model/lstm-{epoch:02d}-{val_loss:.2f}.hdf5", save_best_only=True),
+    ModelCheckpoint("model/lstm-{epoch:02d}-{val_loss:.2f}.hdf5"),
     TensorBoard(log_dir='logs')
 ]
 
 model = Sequential()
-model.add(LSTM(150, input_shape=(300, n_features), return_sequences=True, dropout=0.2))
+model.add(LSTM(150, input_shape=(150, n_features), return_sequences=True, dropout=0.2))
 model.add(Dense(10, activation='relu'))
 model.add(Flatten())
 model.add(Dense(1))
@@ -54,7 +54,7 @@ model.summary()
 model.compile(optimizer=Adam(lr=0.0005), loss="mae")
 history = model.fit_generator(train_gen,
                               steps_per_epoch=1000,
-                              epochs=5,
+                              epochs=15,
                               verbose=1,
                               callbacks=callbacks,
                               validation_data=valid_gen,
