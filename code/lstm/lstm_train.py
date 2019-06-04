@@ -6,15 +6,15 @@ import numpy as np
 from tqdm import tqdm
 from tensorflow.keras.models import Sequential
 # from tensorflow.keras.layers import Dense, LSTM, Flatten
-from tensorflow.keras.layers import Dense, CuDNNGRU
+from tensorflow.keras.layers import Dense, CuDNNGRU, BatchNormalization
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import ModelCheckpoint, TensorBoard
+# from tensorflow.keras.layers.wrappers import Bidirectional
 
 from generator import gen
-
 # use all time series data 104677355
 
-n_features = 20
+n_features = 20 
 
 # delete old checkpoints and logs
 shutil.rmtree('logs')
@@ -28,13 +28,23 @@ parser.add_argument("-p", "--partial", help="Use only a part of dataset", action
 args = parser.parse_args()
 if args.partial:
     print("Reading 30% of dataset...")
-    float_data = pd.read_csv("raw_data/train.csv", \
-                             dtype={"acoustic_data": np.float32, "time_to_failure": np.float32}, \
-                             nrows=204677355).to_numpy()
+    if os.path.isfile('raw_data/partial_train.parquet.gzip'):
+        float_data =  pd.read_parquet('raw_data/partial_train.parquet.gzip').to_numpy()
+    else:
+        float_data = pd.read_csv("raw_data/train.csv", \
+                                 dtype={"acoustic_data": np.float32, "time_to_failure": np.float32}, \
+                                 nrows=204677355)
+        float_data.to_parquet('raw_data/partial_train.parquet.gzip', compression='gzip')
+        float_data = float_data.to_numpy() 
 else:
     print("Reading full dataset...")
-    float_data = pd.read_csv("raw_data/train.csv", \
-                             dtype={"acoustic_data": np.float32, "time_to_failure": np.float32}).to_numpy()
+    if os.path.isfile('raw_data/full_train.parquet.gzip'):
+        float_data =  pd.read_parquet('raw_data/full_train.parquet.gzip').to_numpy()
+    else:
+        float_data = pd.read_csv("raw_data/train.csv", \
+                                 dtype={"acoustic_data": np.float32, "time_to_failure": np.float32})
+        float_data.to_parquet('raw_data/full_train.parquet.gzip', compression='gzip')
+        float_data = float_data.to_numpy()
 
 print('read raw data complete')
 train_gen = gen(float_data) # samples, targets
@@ -47,7 +57,8 @@ callbacks = [
 
 model = Sequential()
 # model.add(LSTM(150, input_shape=(150, n_features), return_sequences=True, dropout=0.2))
-model.add(CuDNNGRU(48, input_shape=(None, n_features)))
+model.add(CuDNNGRU(48, input_shape=(None, n_features), kernel_initializer='he_normal'))
+model.add(BatchNormalization())
 model.add(Dense(10, activation='relu'))
 # model.add(Flatten())
 model.add(Dense(1))

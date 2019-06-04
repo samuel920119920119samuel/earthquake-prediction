@@ -1,5 +1,6 @@
 import numpy as np
 from tqdm import tqdm
+from scipy.stats import kurtosis
 
 # n_step step_len
 
@@ -8,6 +9,10 @@ def extract_feature(z):
                  z.min(axis=1),
                  z.max(axis=1),
                  z.std(axis=1)]
+                 #kurtosis(z, axis=1),
+                 #np.percentile(z, 5, axis=1),
+                 #np.percentile(z, 95, axis=1),
+                 #np.abs(np.fft.fft2(z).max(axis=1))*2/150]
 
 def create_X(x, last_index=None, n_steps=150, step_len=1000):
     if last_index == None:
@@ -22,7 +27,7 @@ def create_X(x, last_index=None, n_steps=150, step_len=1000):
                  extract_feature(tmp[:, -step_len//50:]),
                  extract_feature(tmp[:, -step_len//100:])]
 
-def gen(data, min_index=0, max_index=None, batch_size=32, n_steps=150, step_len=1000, n_features=20):
+def gen(data, min_index=0, max_index=None, batch_size=64, n_steps=150, step_len=1000, n_features=20):
     if max_index is None:
         max_index = len(data) - 1
     while True:
